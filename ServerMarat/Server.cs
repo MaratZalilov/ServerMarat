@@ -15,9 +15,11 @@ namespace ServerMarat
 {
     public partial class Server : Form
     {
-        TcpListener listener;
+        private TcpListener _listener;
 
         private string _answerAndQuestion = null;
+        private string _path = null;
+
         public Server()
         {
             InitializeComponent();
@@ -41,13 +43,13 @@ namespace ServerMarat
         public async void SendQuestionAndAnswer()
         {
             IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8888);
-            listener = new TcpListener(ipPoint);
+            _listener = new TcpListener(ipPoint);
             try
             {
                 
-               listener.Start();
+               _listener.Start();
                 MessageBox.Show("Сервер запущен");
-               TcpClient handler = await listener.AcceptTcpClientAsync();
+               TcpClient handler = await _listener.AcceptTcpClientAsync();
                NetworkStream stream = handler.GetStream();
                 stream.Write(Encoding.UTF8.GetBytes(_answerAndQuestion),0, _answerAndQuestion.Length);
 
@@ -63,7 +65,7 @@ namespace ServerMarat
             string name;
             try
             {
-                StreamReader sr = new StreamReader(@"C:\Users\Пользователь\Source\Repos\Laboratory_Number_2\Laboratory_Number_1\QuestionAndAnswer\QuestionAndAnswer.txt");
+                StreamReader sr = new StreamReader(@_path);
                 for (int i = 0; i < 5; i++)
                 {
                     name = sr.ReadLine();
@@ -83,7 +85,12 @@ namespace ServerMarat
 
         private void открытьToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            string fileName = null;
             openFileDialog1.ShowDialog();
+            fileName = openFileDialog1.FileName;
+            _path = Path.GetFullPath(fileName);
+
+            MessageBox.Show(_path);
         }
 
         
