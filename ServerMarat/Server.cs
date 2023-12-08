@@ -10,6 +10,8 @@ using System.Windows.Forms;
 using System.Net.Sockets;
 using System.Net;
 using System.IO;
+using Excel = Microsoft.Office.Interop.Excel;
+using Microsoft.Office.Interop.Excel;
 
 namespace ServerMarat
 {
@@ -51,7 +53,7 @@ namespace ServerMarat
                 MessageBox.Show("Сервер запущен");
                TcpClient handler = await _listener.AcceptTcpClientAsync();
                NetworkStream stream = handler.GetStream();
-                stream.Write(Encoding.UTF8.GetBytes(_answerAndQuestion),0, _answerAndQuestion.Length);
+               stream.Write(Encoding.UTF8.GetBytes(_answerAndQuestion),0, _answerAndQuestion.Length);
 
             }
             catch (Exception ex)
@@ -61,26 +63,65 @@ namespace ServerMarat
         }
         public void ReadTheAnswerAndQuestion()
         {
-            
-            string name;
+
+           Excel.Application excelApp = new Excel.Application();
+
             try
             {
-                StreamReader sr = new StreamReader(@_path);
-                for (int i = 0; i < 5; i++)
+
+
+                if (excelApp == null)
                 {
-                    name = sr.ReadLine();
+                    MessageBox.Show("Excel is not installed!!");
+                    return;
+                }
 
-                    _answerAndQuestion += name;
-                    _answerAndQuestion += '\n';
-                   
+                Workbook excelBook = excelApp.Workbooks.Open(@_path);
+                _Worksheet excelSheet = excelBook.Sheets[1];
+                Range excelRange = excelSheet.UsedRange;
 
-                };
-                MessageBox.Show(_answerAndQuestion);
+                int rows = excelRange.Rows.Count;
+                int cols = excelRange.Columns.Count;
+
+                for (int i = 1; i <= rows; i++)
+                {
+                    //create new line
+                    MessageBox.Show("\r\n");
+                    for (int j = 1; j <= cols; j++)
+                    {
+
+                        //write the console
+                        if (excelRange.Cells[i, j] != null && excelRange.Cells[i, j].Value2 != null)
+                            Console.Write(excelRange.Cells[i, j].Value2.ToString() + "\t");
+                        _answerAndQuestion += excelRange.Cells[i, j].Value2.ToString() + "\t";
+                    }
+                }
             }
-            catch (Exception ex)
+            catch (Exception ex) 
             {
-                MessageBox.Show(ex.Message);
+            MessageBox.Show(ex.Message);
+                
             }
+
+            //string name;
+            //try
+            //{
+            //    StreamReader sr = new StreamReader(@_path);
+            //    for (int i = 0; i < 5; i++)
+            //    {
+            //        name = sr.ReadLine();
+
+            //        _answerAndQuestion += name;
+            //        _answerAndQuestion += '\n';
+
+
+            //    };
+            //    MessageBox.Show(_answerAndQuestion);
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show(ex.Message);
+            //}
         }
 
         private void открытьToolStripMenuItem_Click(object sender, EventArgs e)
