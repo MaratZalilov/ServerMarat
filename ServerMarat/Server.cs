@@ -20,7 +20,10 @@ namespace ServerMarat
         private TcpListener _listener;
 
         private string _answerAndQuestion = null;
+        private string[] _Message = null;
         private string _path = null;
+
+        private byte[] buffer = new byte[1024];
 
         public Server()
         {
@@ -48,12 +51,21 @@ namespace ServerMarat
             _listener = new TcpListener(ipPoint);
             try
             {
-                
-               _listener.Start();
-                MessageBox.Show("Сервер запущен");
-               TcpClient handler = await _listener.AcceptTcpClientAsync();
-               NetworkStream stream = handler.GetStream();
-               stream.Write(Encoding.UTF8.GetBytes(_answerAndQuestion),0, _answerAndQuestion.Length);
+                if (_path == null)
+                {
+                    MessageBox.Show("Выберите Excel файл");
+                }
+                else
+                {
+
+                    _listener.Start();
+                    MessageBox.Show("Сервер запущен");
+                    TcpClient handler = await _listener.AcceptTcpClientAsync();
+                    NetworkStream stream = handler.GetStream();
+                  
+                    stream.Write(Encoding.UTF32.GetBytes(_answerAndQuestion),0,_answerAndQuestion.Length);
+
+                }
 
             }
             catch (Exception ex)
@@ -70,11 +82,11 @@ namespace ServerMarat
             {
 
 
-                if (excelApp == null)
-                {
-                    MessageBox.Show("Excel is not installed!!");
-                    return;
-                }
+                //if (excelApp == null)
+                //{
+                //    MessageBox.Show("Excel is not installed!!");
+                //    return;
+                //}
 
                 Workbook excelBook = excelApp.Workbooks.Open(@_path);
                 _Worksheet excelSheet = excelBook.Sheets[1];
@@ -82,20 +94,21 @@ namespace ServerMarat
 
                 int rows = excelRange.Rows.Count;
                 int cols = excelRange.Columns.Count;
-
+                MessageBox.Show(cols.ToString()+rows.ToString());
                 for (int i = 1; i <= rows; i++)
                 {
-                    //create new line
-                    MessageBox.Show("\r\n");
+                    
                     for (int j = 1; j <= cols; j++)
                     {
 
                         //write the console
                         if (excelRange.Cells[i, j] != null && excelRange.Cells[i, j].Value2 != null)
-                            Console.Write(excelRange.Cells[i, j].Value2.ToString() + "\t");
-                        _answerAndQuestion += excelRange.Cells[i, j].Value2.ToString() + "\t";
+                            //MessageBox.Show(excelRange.Cells[i, j].Value2.ToString() + "/n");
+                            _answerAndQuestion += Encoding.UTF8.GetString(excelRange.Cells[i, j].Value2.ToString() + '\n');
+                        
                     }
                 }
+                MessageBox.Show("");
             }
             catch (Exception ex) 
             {
@@ -130,8 +143,6 @@ namespace ServerMarat
             openFileDialog1.ShowDialog();
             fileName = openFileDialog1.FileName;
             _path = Path.GetFullPath(fileName);
-
-            MessageBox.Show(_path);
         }
 
         
