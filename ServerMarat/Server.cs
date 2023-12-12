@@ -143,6 +143,8 @@ namespace ServerMarat
             openFileDialog1.ShowDialog();
             fileName = openFileDialog1.FileName;
             _path = Path.GetFullPath(fileName);
+
+            MessageBox.Show(_path);
         }
 
         
